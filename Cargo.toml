@@ -1,0 +1,23 @@
+[package]
+name = "dimenshot"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+bevy = "0.20.1"
+
+# Dev build: compile our code fast-ish, but dependencies (Bevy) fully optimized
+# so the game is smooth even in `cargo run`.
+[profile.dev]
+opt-level = 1
+
+[profile.dev.package."*"]
+opt-level = 3
+
+# Release build: maximum runtime performance.
+[profile.release]
+opt-level = 3
+lto = "thin"
+codegen-units = 1
+panic = "abort"
+strip = true
