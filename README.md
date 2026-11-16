@@ -123,5 +123,4 @@ cargo run --release
 
 ## License
 
-This project is open-source and available under the [MIT License](https://opensource.org/licenses/MIT) or [Apache-2.0 License](https://www.apache.org/licenses/LICENSE-2.0).
-
+This project is open-source and available under the [MIT License](https://opensource.org/licenses/MIT).
