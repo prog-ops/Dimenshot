@@ -1,1 +1,76 @@
-/target
+# ==============================================================================
+# Rust / Cargo Build & Dependency Artifacts
+# ==============================================================================
+# Note: Cargo.lock is intentionally kept tracked for binary/application builds.
+/target/
+target/
+vendor/
+**/*.rs.bk
+*.pdb
+*.dSYM/
+
+# Profiling, Coverage & Crash Dumps
+*.profraw
+*.profdata
+*.gcda
+*.gcno
+lcov.info
+flamegraph.svg
+perf.data*
+*.dmp
+*.stackdump
+
+# ==============================================================================
+# Cross-Compile, Packaging & Distribution Folders
+# ==============================================================================
+build/
+dist/
+out/
+pkg/
+release/
+.wasm-pack/
+
+# ==============================================================================
+# Bevy, Shader & Tooling Caches
+# ==============================================================================
+imported_assets/
+.cache/
+*.cache
+.sccache/
+node_modules/
+
+# ==============================================================================
+# IDEs & Editors (RustRover, VS Code, Vim, Visual Studio)
+# ==============================================================================
+.idea/
+*.iml
+.vscode/
+.vs/
+*.suo
+*.user
+*.sln.docstates
+*.sublime-workspace
+*.swp
+*.swo
+*~
+
+# ==============================================================================
+# Environment, Logs & Temp Files
+# ==============================================================================
+.env
+.env.local
+.env.*.local
+*.log
+logs/
+*.tmp
+*.bak
+
+# ==============================================================================
+# OS Generated Files
+# ==============================================================================
+.DS_Store
+.AppleDouble
+.LSOverride
+Thumbs.db
+ehthumbs.db
+desktop.ini
