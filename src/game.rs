@@ -76,9 +76,9 @@ pub enum SpinMode {
 impl SpinMode {
     pub fn label(self) -> &'static str {
         match self {
-            SpinMode::Tilt => "MIRING",
-            SpinMode::Tumble => "ACAK",
-            SpinMode::Roll => "GULING",
+            SpinMode::Tilt => "TILT",
+            SpinMode::Tumble => "TUMBLE",
+            SpinMode::Roll => "ROLL",
         }
     }
     fn next(self) -> Self {

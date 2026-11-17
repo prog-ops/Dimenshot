@@ -6,7 +6,7 @@ use bevy::{
     window::PrimaryWindow,
 };
 
-use crate::game::{SpinSettings, Stats, MAX_SPIN};
+use crate::game::{MAX_SPIN, SpinSettings, Stats};
 use crate::globe::Globe;
 
 pub struct HudPlugin;
@@ -48,7 +48,13 @@ fn font(size: f32) -> TextFont {
     }
 }
 
-fn stat_block(parent: &mut ChildSpawnerCommands, label: &str, value: &str, align: AlignItems, marker: impl Component) {
+fn stat_block(
+    parent: &mut ChildSpawnerCommands,
+    label: &str,
+    value: &str,
+    align: AlignItems,
+    marker: impl Component,
+) {
     parent
         .spawn(Node {
             flex_direction: FlexDirection::Column,
@@ -57,7 +63,13 @@ fn stat_block(parent: &mut ChildSpawnerCommands, label: &str, value: &str, align
         })
         .with_children(|b| {
             b.spawn((Text::new(label), font(11.0), TextColor(LABEL)));
-            b.spawn((Text::new(value), font(22.0), TextColor(Color::WHITE), TextShadow::default(), marker));
+            b.spawn((
+                Text::new(value),
+                font(22.0),
+                TextColor(Color::WHITE),
+                TextShadow::default(),
+                marker,
+            ));
         });
 }
 
@@ -103,9 +115,9 @@ fn setup_hud(mut commands: Commands) {
                 ..default()
             })
             .with_children(|row| {
-                stat_block(row, "BRICK", "0 / 0", AlignItems::FlexStart, BricksText);
-                stat_block(row, "WAKTU", "00:00.0", AlignItems::Center, TimeText);
-                stat_block(row, "AKURASI", "--", AlignItems::FlexEnd, AccText);
+                stat_block(row, "BRICKS", "0 / 0", AlignItems::FlexStart, BricksText);
+                stat_block(row, "TIME", "00:00.0", AlignItems::Center, TimeText);
+                stat_block(row, "ACCURACY", "--", AlignItems::FlexEnd, AccText);
             });
             bar(top, 5.0, ACCENT, ProgressFill);
         });
@@ -122,12 +134,18 @@ fn setup_hud(mut commands: Commands) {
             ..default()
         })
         .with_children(|bottom| {
-            bottom.spawn((Text::new("PUTARAN x1.00"), font(14.0), TextColor(GOLD), TextShadow::default(), SpinText));
+            bottom.spawn((
+                Text::new("SPIN x1.00"),
+                font(14.0),
+                TextColor(GOLD),
+                TextShadow::default(),
+                SpinText,
+            ));
             bar(bottom, 3.0, GOLD, SpinFill);
             bottom.spawn((
                 Text::new(
-                    "Klik kiri / Space (tahan): tembak   Scroll / + - : kecepatan putar\n\
-                     0: stop   1 2 3: preset   T: balik arah   M: mode sumbu   R: ulang   F: FPS",
+                    "Left Click / Space (hold): fire   Scroll / + - : spin speed\n\
+                     0: pause   1 2 3: presets   T: reverse   M: axis mode   R: reset   F: FPS",
                 ),
                 font(10.5),
                 TextColor(Color::srgb(0.45, 0.5, 0.62)),
@@ -165,7 +183,12 @@ fn setup_hud(mut commands: Commands) {
             Overlay,
         ))
         .with_children(|o| {
-            o.spawn((Text::new("GLOBE HANCUR!"), font(38.0), TextColor(ACCENT), TextShadow::default()));
+            o.spawn((
+                Text::new("GLOBE CLEARED!"),
+                font(38.0),
+                TextColor(ACCENT),
+                TextShadow::default(),
+            ));
             o.spawn((
                 Text::new(""),
                 font(16.0),
@@ -213,7 +236,10 @@ fn update_hud(
     mut spin_fill: Single<&mut Node, (With<SpinFill>, Without<ProgressFill>)>,
     mut overlay: Single<&mut Visibility, With<Overlay>>,
 ) {
-    set_text(&mut texts.p0(), format!("{} / {}", globe.remaining, globe.total));
+    set_text(
+        &mut texts.p0(),
+        format!("{} / {}", globe.remaining, globe.total),
+    );
     set_text(&mut texts.p1(), fmt_time(stats.elapsed));
     let acc = if stats.shots == 0 {
         "--".to_string()
@@ -223,15 +249,20 @@ fn update_hud(
     set_text(&mut texts.p2(), acc.clone());
 
     let state = if spin.paused || spin.multiplier == 0.0 {
-        "BERHENTI"
+        "PAUSED"
     } else if spin.reverse {
-        "MUNDUR"
+        "REVERSE"
     } else {
-        "MAJU"
+        "FORWARD"
     };
     set_text(
         &mut texts.p3(),
-        format!("PUTARAN x{:.2}   {}   SUMBU: {}", spin.multiplier, state, spin.mode.label()),
+        format!(
+            "SPIN x{:.2}   {}   AXIS: {}",
+            spin.multiplier,
+            state,
+            spin.mode.label()
+        ),
     );
 
     if let Some(fps) = diagnostics
@@ -250,10 +281,18 @@ fn update_hud(
         1.0 - globe.remaining as f32 / globe.total as f32
     };
     progress.width = percent(cleared * 100.0);
-    let spin_frac = if spin.paused { 0.0 } else { spin.multiplier / MAX_SPIN };
+    let spin_frac = if spin.paused {
+        0.0
+    } else {
+        spin.multiplier / MAX_SPIN
+    };
     spin_fill.width = percent(spin_frac * 100.0);
 
-    let vis = if stats.won { Visibility::Visible } else { Visibility::Hidden };
+    let vis = if stats.won {
+        Visibility::Visible
+    } else {
+        Visibility::Hidden
+    };
     if **overlay != vis {
         **overlay = vis;
     }
@@ -261,7 +300,7 @@ fn update_hud(
         set_text(
             &mut texts.p5(),
             format!(
-                "Waktu {}   Akurasi {}\n{} tembakan untuk {} brick\n\nTekan R untuk main lagi",
+                "Time {}   Accuracy {}\n{} shots for {} bricks\n\nPress R to play again",
                 fmt_time(stats.elapsed),
                 acc,
                 stats.shots,
@@ -273,7 +312,10 @@ fn update_hud(
 
 fn toggle_fps(keys: Res<ButtonInput<KeyCode>>, mut fps: Single<&mut Text, With<FpsText>>) {
     if keys.just_pressed(KeyCode::KeyF) {
-        fps.0 = if fps.0.is_empty() { "-- FPS".into() } else { String::new() };
+        fps.0 = if fps.0.is_empty() {
+            "-- FPS".into()
+        } else {
+            String::new()
+        };
     }
 }
-
